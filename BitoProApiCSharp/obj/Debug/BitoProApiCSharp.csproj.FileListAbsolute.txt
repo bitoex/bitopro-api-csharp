@@ -1,0 +1,14 @@
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\bin\Debug\BitoProApiCSharp.exe.config
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\bin\Debug\BitoProApiCSharp.exe
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\bin\Debug\BitoProApiCSharp.pdb
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\bin\Debug\log4net.dll
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\bin\Debug\Newtonsoft.Json.dll
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\bin\Debug\websocket-sharp.dll
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\bin\Debug\log4net.xml
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\bin\Debug\Newtonsoft.Json.xml
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\bin\Debug\websocket-sharp.xml
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\obj\Debug\BitoProApiCSharp.csproj.AssemblyReference.cache
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\obj\Debug\BitoProApiCSharp.csproj.CoreCompileInputs.cache
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\obj\Debug\BitoProApiCSharp.csproj.CopyComplete
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\obj\Debug\BitoProApiCSharp.exe
+D:\Kuan\Studying\C#\bitopro-api-csharp\BitoProApiCSharp\obj\Debug\BitoProApiCSharp.pdb

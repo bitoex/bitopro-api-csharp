@@ -32,7 +32,7 @@ git https://github.com/bitoex/bitopro-api-csharp.git
 - Console app with examples ready to launch _(provide API keys)_
 
 ## Examples
-All examples are available to play around with within the repositorys Console application which can be found.
+All examples are available to play around with within the repositorys Console application which can be found in `Program.cs`.
 
 ## Usage
 Code examples below, or clone the repository and run the  project.
