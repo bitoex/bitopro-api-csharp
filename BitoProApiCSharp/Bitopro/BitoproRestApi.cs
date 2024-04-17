@@ -1,10 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 
 namespace Bitopro
@@ -30,7 +28,7 @@ namespace Bitopro
         /// https://github.com/bitoex/bitopro-offical-api-docs/blob/master/api/v3/public/get_currency_info.md#get-currency-info
         /// </summary>
         /// <returns>the list of currencies</returns>
-        public async Task<dynamic> GetCurrencies()
+        public async Task<JsonObject> GetCurrencies()
         {
             return await SendRequestAsync("/provisioning/currencies", ApiMethod.GET, null, false);
         }
@@ -39,7 +37,7 @@ namespace Bitopro
         /// https://github.com/bitoex/bitopro-offical-api-docs/blob/master/api/v3/public/get_limitations_and_fees.md
         /// </summary>
         /// <returns>the limitations and fees</returns>
-        public async Task<dynamic> GetLimitationsAndFees()
+        public async Task<JsonObject> GetLimitationsAndFees()
         {
             return await SendRequestAsync("/provisioning/limitations-and-fees", ApiMethod.GET, null, false);
         }
@@ -51,7 +49,7 @@ namespace Bitopro
         /// <param name="limit">the limit for the response</param>
         /// <param name="scale">scale for the response. Valid scale values are different by pair</param>
         /// <returns>the full order book of the specific pair</returns>
-        public async Task<dynamic> GetOrderBook(string pair = "", int limit = 5, int scale = 0)
+        public async Task<JsonObject> GetOrderBook(string pair = "", int limit = 5, int scale = 0)
         {
             var parameters = new Dictionary<string, object>()
             {
@@ -66,7 +64,7 @@ namespace Bitopro
         /// </summary>
         /// <param name="pair">the trading pair in format</param>
         /// <returns>the ticker is a high level overview of the state of the market.</returns>
-        public async Task<dynamic> GetTicker(string pair = "")
+        public async Task<JsonObject> GetTicker(string pair = "")
         {
             return await SendRequestAsync($"/tickers/{pair}", ApiMethod.GET, null, false);
         }
@@ -76,7 +74,7 @@ namespace Bitopro
         /// </summary>
         /// <param name="pair">the trading pair in format</param>
         /// <returns>a list of the most recent trades for the given symbol</returns>
-        public async Task<dynamic> GetTrades(string pair = "")
+        public async Task<JsonObject> GetTrades(string pair = "")
         {
             return await SendRequestAsync(
                 $"/trades/{pair}", ApiMethod.GET, null, false);
@@ -90,7 +88,7 @@ namespace Bitopro
         /// <param name="pair">the trading pair in format</param>
         /// <param name="resolution">the timeframe of the candlestick chart</param>
         /// <returns></returns>
-        public async Task<dynamic> GetCandlestick(DateTime startDatetime, DateTime endDateTime, string pair = "", CandlestickResolutin resolution = CandlestickResolutin._1d)
+        public async Task<JsonObject> GetCandlestick(DateTime startDatetime, DateTime endDateTime, string pair = "", CandlestickResolutin resolution = CandlestickResolutin._1d)
         {
             var parameters = new Dictionary<string, object>()
             {
@@ -105,7 +103,7 @@ namespace Bitopro
         /// https://github.com/bitoex/bitopro-offical-api-docs/blob/master/api/v3/public/get_trading_pair_info.md
         /// </summary>
         /// <returns>a list of pairs available for trade</returns>
-        public async Task<dynamic> GetTradingPairs()
+        public async Task<JsonObject> GetTradingPairs()
         {
             return await SendRequestAsync("/provisioning/trading-pairs", ApiMethod.GET, null, false);
         }
@@ -117,7 +115,7 @@ namespace Bitopro
         /// https://github.com/bitoex/bitopro-offical-api-docs/blob/master/api/v3/private/get_account_balance.md
         /// </summary>
         /// <returns>the account balance</returns>
-        public async Task<dynamic> GetAccountBalance()
+        public async Task<JsonObject> GetAccountBalance()
         {
             _headerPayload = new
             {
@@ -133,7 +131,7 @@ namespace Bitopro
         /// <param name="orderId">the trading pair in format</param>
         /// <param name="pair">the id of the order</param>
         /// <returns></returns>
-        public async Task<dynamic> CancelAnOrder(string orderId, string pair)
+        public async Task<JsonObject> CancelAnOrder(string orderId, string pair)
         {
             _headerPayload = new
             {
@@ -148,7 +146,7 @@ namespace Bitopro
         /// </summary>
         /// <param name="pair">the trading pair in format</param>
         /// <returns>cancel all your active orders of all pairs</returns>
-        public async Task<dynamic> CancelAllOrders(string pair)
+        public async Task<JsonObject> CancelAllOrders(string pair)
         {
             _headerPayload = new
             {
@@ -163,11 +161,11 @@ namespace Bitopro
         /// </summary>
         /// <param name="orders_request">send a json format request to cancel multiple orders at a time. example: {"BTC_USDT": ["12234566","12234567"],"ETH_USDT": ["44566712","24552212"]}</param>
         /// <returns>multiple orders will be canceled</returns>
-        public async Task<dynamic> CancelMultipleOrders(Dictionary<string, List<object>> ordersRequest)
+        public async Task<JsonObject> CancelMultipleOrders(Dictionary<string, List<object>> ordersRequest)
         {
             _headerPayload = ordersRequest;
 
-            string json = JsonConvert.SerializeObject(ordersRequest);
+            string json = JsonSerializer.Serialize(ordersRequest);
             _httpContent = new StringContent(json, Encoding.Default, "application/json");
 
             return await SendRequestAsync("/orders/", ApiMethod.PUT, null, true);
@@ -186,7 +184,7 @@ namespace Bitopro
         /// <param name="timeInForce">time in force condition for orders. If type is MARKET, this will always be GTC</param>
         /// <param name="clientId">this information help users distinguish their orders</param>
         /// <returns>a dict contains an order info</returns>
-        public async Task<dynamic> CreateAnOrder(OrderAction actionData, double amountData, double priceData, OrderType orderType, string pair, double? stopPriceData = null, string conditionData = "", TimeInForce timeInForceData = TimeInForce.GTC, int? clientIdData = null)
+        public async Task<JsonObject> CreateAnOrder(OrderAction actionData, double amountData, double priceData, OrderType orderType, string pair, double? stopPriceData = null, string conditionData = "", TimeInForce timeInForceData = TimeInForce.GTC, int? clientIdData = null)
         {
             _headerPayload = new
             {
@@ -201,7 +199,7 @@ namespace Bitopro
                 clientId = clientIdData == null ? 0 : clientIdData,
             };
 
-            string json = JsonConvert.SerializeObject(_headerPayload);
+            string json = JsonSerializer.Serialize(_headerPayload);
             _httpContent = new StringContent(json, Encoding.Default, "application/json");
 
             return await SendRequestAsync($"/orders/{pair}", ApiMethod.POST, null, true);
@@ -232,11 +230,11 @@ namespace Bitopro
         ///]
         /// </param>
         /// <returns></returns>
-        public async Task<dynamic> CreateBatchOrder(List<object> ordersRequest)
+        public async Task<JsonObject> CreateBatchOrder(List<object> ordersRequest)
         {
             _headerPayload = ordersRequest;
 
-            string json = JsonConvert.SerializeObject(ordersRequest);
+            string json = JsonSerializer.Serialize(ordersRequest);
             _httpContent = new StringContent(json, Encoding.Default, "application/json");
 
             return await SendRequestAsync("/orders/batch", ApiMethod.POST, null, true);
@@ -255,7 +253,7 @@ namespace Bitopro
         /// <param name="orderId">if specified, list starts with order with id >= orderId</param>
         /// <param name="clientId">this information help users distinguish their orders</param>
         /// <returns></returns>
-        public async Task<dynamic> GetAllOrders(string pair, DateTime? startDatetime=null, DateTime? endDatetime = null, bool ignoreTimeLimit = false, StatusKind statusKind= StatusKind.ALL, OrderStatus? status=null, int limit = 100, string orderId = null, int? clientId = null)
+        public async Task<JsonObject> GetAllOrders(string pair, DateTime? startDatetime=null, DateTime? endDatetime = null, bool ignoreTimeLimit = false, StatusKind statusKind= StatusKind.ALL, OrderStatus? status=null, int limit = 100, string orderId = null, int? clientId = null)
         {
             var parameter = new Dictionary<string, object>()
             {
@@ -290,7 +288,7 @@ namespace Bitopro
         /// <param name="pair">the trading pair in format</param>
         /// <param name="orderId">the id of the order</param>
         /// <returns>an order infomation</returns>
-        public async Task<dynamic> GetAnOrder(string pair, string orderId)
+        public async Task<JsonObject> GetAnOrder(string pair, string orderId)
         {
             _headerPayload = new
             {
@@ -311,7 +309,7 @@ namespace Bitopro
         /// <param name="tradeId">the id of the first trade in the response</param>
         /// <param name="limit">the limit for the response</param>
         /// <returns>the all trades</returns>
-        public async Task<dynamic> GetTradesList(string pair, DateTime? startDatetime=null, DateTime? endDatetime = null, string orderId=null, string tradeId = null, int limit = 100)
+        public async Task<JsonObject> GetTradesList(string pair, DateTime? startDatetime=null, DateTime? endDatetime = null, string orderId=null, string tradeId = null, int limit = 100)
         {
             var parameter = new Dictionary<string, object>()
             {
@@ -345,7 +343,7 @@ namespace Bitopro
         /// <param name="id">the id of the first data in the response</param>
         /// <param name="status"></param>
         /// <returns></returns>
-        public async Task<dynamic> GetDepositHistory(string currency, DateTime? startDatetime = null, DateTime? endDatetime = null, int limitData = 100, string idData = "", CurrencyStatus status = CurrencyStatus.WAIT_PROCESS)
+        public async Task<JsonObject> GetDepositHistory(string currency, DateTime? startDatetime = null, DateTime? endDatetime = null, int limitData = 100, string idData = "", CurrencyStatus status = CurrencyStatus.WAIT_PROCESS)
         {
             var parameter = new Dictionary<string, object>()
             {
@@ -377,7 +375,7 @@ namespace Bitopro
         /// <param name="id">the id of the first data in the response</param>
         /// <param name="status"></param>
         /// <returns></returns>
-        public async Task<dynamic> GetWithdrawHistory(string currency, DateTime? startDatetime = null, DateTime? endDatetime = null, int limitData = 100, string idData = "", CurrencyStatus status = CurrencyStatus.WAIT_PROCESS)
+        public async Task<JsonObject> GetWithdrawHistory(string currency, DateTime? startDatetime = null, DateTime? endDatetime = null, int limitData = 100, string idData = "", CurrencyStatus status = CurrencyStatus.WAIT_PROCESS)
         {
             var parameter = new Dictionary<string, object>()
             {
@@ -406,7 +404,7 @@ namespace Bitopro
         /// <param name="currency">the currency of the withdraw to get</param>
         /// <param name="serial">the serial of the withdraw</param>
         /// <returns>the withdraw information</returns>
-        public async Task<dynamic> GetWithdraw(string currency, string serial)
+        public async Task<JsonObject> GetWithdraw(string currency, string serial)
         {
             _headerPayload = new
             {
@@ -426,7 +424,7 @@ namespace Bitopro
         /// <param name="amount">the amount of fund to send</param>
         /// <param name="message">the message or note to be attached with withdraw</param>
         /// <returns></returns>
-        public async Task<dynamic> Withdraw(string currency, WithdrawProtocol protocolData, string addressData, double amountData, string messageData)
+        public async Task<JsonObject> Withdraw(string currency, WithdrawProtocol protocolData, string addressData, double amountData, string messageData)
         {
             _headerPayload = new
             {
@@ -437,14 +435,14 @@ namespace Bitopro
                 message = messageData
             };
 
-            string json = JsonConvert.SerializeObject(_headerPayload);
+            string json = JsonSerializer.Serialize(_headerPayload);
             _httpContent = new StringContent(json, Encoding.Default, "application/json");
 
             return await SendRequestAsync($"/wallet/withdraw/{currency}", ApiMethod.POST, null, true);
         }
         #endregion
 
-        private async Task<dynamic> SendRequestAsync(string endPoint, ApiMethod method, Dictionary<string, object> parameter, bool isSigned)
+        private async Task<JsonObject> SendRequestAsync(string endPoint, ApiMethod method, Dictionary<string, object> parameter, bool isSigned)
         {
             var finalEndpoint = FinalEndPoint(endPoint, parameter);
 
@@ -463,7 +461,7 @@ namespace Bitopro
                 if(!response.IsSuccessStatusCode)
                     Utils.Logger.Error(responseContent);
             
-                return JsonConvert.DeserializeObject<dynamic>(responseContent);
+                return JsonSerializer.Deserialize<JsonObject>(responseContent);
             }
         }
 
@@ -471,7 +469,7 @@ namespace Bitopro
         {
             _httpClient.DefaultRequestHeaders.Clear();
 
-            var payload = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(parameter)));
+            var payload = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(parameter)));
             var signature = Utils.GenerateSignature(_apiKeySecret, payload).ToLower();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Add("X-BITOPRO-APIKEY", _apiKey);

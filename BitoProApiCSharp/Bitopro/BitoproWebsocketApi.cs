@@ -1,10 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using WebSocketSharp;
-using ErrorEventArgs = WebSocketSharp.ErrorEventArgs;
+﻿using System.Text;
+using System.Text.Json;
+using WebSocket4Net;
 
 namespace Bitopro
 {
@@ -86,14 +82,6 @@ namespace Bitopro
 
         public void InitWebsocket()
         {
-            WebSocket = new WebSocket(ConnectUrl);
-            WebSocket.OnOpen += WebSocket_OnOpen;
-            WebSocket.OnClose += WebSocket_OnClose;
-            WebSocket.OnMessage += WebSocket_OnMessage;
-            WebSocket.OnError += WebSocket_OnError;
-
-            WebSocket.SslConfiguration.EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12;
-
             if (!string.IsNullOrEmpty(Account) && !string.IsNullOrEmpty(ApiKey) && !string.IsNullOrEmpty(ApiSecret))
             {
                 var parameter = new
@@ -101,43 +89,51 @@ namespace Bitopro
                     identity = Account,
                     nonce = Utils.GenerateTimeStamp(DateTime.Now)
                 };
-                var payload = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(parameter)));
+                var payload = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(parameter)));
                 var signature = Utils.GenerateSignature(ApiSecret, payload).ToLower();
 
-                WebSocket.CustomHeaders = new Dictionary<string, string>() 
+                var customHeaders = new List<KeyValuePair<string, string>>()
                 {
-                    {"X-BITOPRO-APIKEY", ApiKey },
-                    {"X-BITOPRO-PAYLOAD", payload},
-                    {"X-BITOPRO-SIGNATURE", signature}
+                    new KeyValuePair<string, string>("X-BITOPRO-APIKEY", ApiKey),
+                    new KeyValuePair<string, string>("X-BITOPRO-PAYLOAD", payload),
+                    new KeyValuePair<string, string>("X-BITOPRO-SIGNATURE", signature)
                 };
+
+                WebSocket = new WebSocket(ConnectUrl, "", null, customHeaders, "", "", WebSocketVersion.None, null, System.Security.Authentication.SslProtocols.Tls12);
             }
-            
-            WebSocket.Connect();
+            else
+                WebSocket = new WebSocket(ConnectUrl);
+
+            WebSocket.Opened += WebSocket_OnOpen;
+            WebSocket.Closed += WebSocket_OnClose;
+            WebSocket.MessageReceived += WebSocket_OnMessage;
+            WebSocket.Error += WebSocket_OnError;
+            WebSocket.Open();
         }
 
-        protected void WebSocket_OnMessage(object sender, MessageEventArgs e)
+        protected void WebSocket_OnMessage(object? sender, MessageReceivedEventArgs e)
         {
-            On_Receive_Message?.Invoke(e.Data);
+            On_Receive_Message?.Invoke(e.Message);
         }
 
-        protected void WebSocket_OnOpen(object sender, EventArgs e)
+        protected void WebSocket_OnOpen(object? sender, EventArgs e)
         {
             Utils.Logger.Info($"{GetType().Name} connected server success");
         }
 
-        protected void WebSocket_OnClose(object sender, CloseEventArgs e)
+        protected void WebSocket_OnClose(object? sender, EventArgs e)
         {
-            Utils.Logger.Info(e.Reason);
+            Utils.Logger.Info(e.ToString());
             Thread.Sleep(3000);
             Utils.Logger.Info($"{GetType().Name} closed connection, reconnecting...");
 
             InitWebsocket();
-            WebSocket.Connect();
+            WebSocket.Open();
         }
 
-        protected void WebSocket_OnError(object sender, ErrorEventArgs e)
+        protected void WebSocket_OnError(object? sender, SuperSocket.ClientEngine.ErrorEventArgs e)
         {
-            Utils.Logger.Error($"{GetType().Name}: {e.Message}");
+            Utils.Logger.Error($"{GetType().Name}: {e.Exception.Message}");
         }
     }
 }

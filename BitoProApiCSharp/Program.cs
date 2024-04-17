@@ -1,9 +1,5 @@
 ﻿using Bitopro;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Text.Json.Nodes;
 
 namespace BitoProApiCSharp
 {
@@ -18,13 +14,14 @@ namespace BitoProApiCSharp
 
         static async Task Main(string[] args)
         {
-            if (File.Exists($"../../{LOG_CONFIG}"))
+            var logPath = $"../../../{LOG_CONFIG}";
+            if (File.Exists(logPath))
             {
-                File.Copy($"../../{LOG_CONFIG}", LOG_CONFIG, true);
+                File.Copy(logPath, LOG_CONFIG, true);
                 log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(LOG_CONFIG));
             }
 
-            await RestfulTest();
+            //await RestfulTest();
             WebsocketTest();
 
             while (true)
@@ -33,7 +30,7 @@ namespace BitoProApiCSharp
 
         private static async Task RestfulTest()
         {
-            dynamic response;
+            JsonObject response;
             var bitopro = new BitoproRestApi(API_KEY, API_SECRET);
 
             #region "Open restful test"
@@ -83,8 +80,8 @@ namespace BitoProApiCSharp
             response = await bitopro.CreateAnOrder(OrderAction.BUY, 0.0001, 10500, OrderType.Limit, SYMBOL);
             if (response != null)
             {
-                if (response.orderId != null)
-                    _orderId = (string)response.orderId;
+                if (response["orderId"] != null)
+                    _orderId = (string)response["orderId"];
                 Utils.Logger.Info($"Limit order created: {response}\r\n");
             }
 
@@ -118,11 +115,12 @@ namespace BitoProApiCSharp
             response = await bitopro.CreateBatchOrder(batchOrders[SYMBOL]);
             if (response != null)
             {
-                if (response.data != null)
+                if (response["data"] != null)
                 {
+                    JsonArray jsonArray = (JsonArray)response["data"];
                     batchOrders[SYMBOL].Clear();
-                    foreach (var item in response.data)
-                        batchOrders[SYMBOL].Add((string)item.orderId);
+                    foreach (var item in jsonArray)
+                        batchOrders[SYMBOL].Add((string)item["orderId"]);
                 }
                 Utils.Logger.Info($"Batch orders created: {response}\r\n");
             }
@@ -193,7 +191,7 @@ namespace BitoProApiCSharp
             bitoproWsUserOrder.On_Receive_Message += Receive_WsMessage;
             bitoproWsUserOrder.InitWebsocket();
 
-            // [Private] GET user trade
+            //// [Private] GET user trade
             var bitoproWsUserTrade = new BitoproUserTradeWebsocket(ACCOUNT, API_KEY, API_SECRET);
             bitoproWsUserTrade.On_Receive_Message += Receive_WsMessage;
             bitoproWsUserTrade.InitWebsocket();

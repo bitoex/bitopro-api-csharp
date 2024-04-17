@@ -2,7 +2,7 @@
 
 ## C# Wrapper for the official Bitopro exchange API
 
-Compatible with **.NET 4.7.2,.NETSTANDARD2.0**
+Compatible with **.NET 8.0**
 
 This repository provides a C# wrapper for the official Bitopro API, all `REST` and `WEBSOCKET` endpoints covered, and a best practice solution coupled with strongly typed responses and requests. It is built on .NET Framework
 
@@ -26,8 +26,7 @@ git https://github.com/bitoex/bitopro-api-csharp.git
 ## Features
 - Simple, Configurable, Extendable
 - Rate limiting, 600 requests per minute per IP
-- `log4net` Interfaces supported
-- dotnet standard, 4.7.2 support
+- dotnet standard, 8.0 support
 - Bitopro WebSockets
 - Console app with examples ready to launch _(provide API keys)_
 
