@@ -21,7 +21,7 @@ namespace BitoProApiCSharp
                 log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(LOG_CONFIG));
             }
 
-            //await RestfulTest();
+            await RestfulTest();
             WebsocketTest();
 
             while (true)
